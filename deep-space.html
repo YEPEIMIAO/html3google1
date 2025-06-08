@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YPM电子天文馆 - 深空天体</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 背景视频设置 */
+        .background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            opacity: 0.3; /* 设置透明度 */
+            filter: brightness(0.2); /* 暗化视频 */
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            z-index: 10;
+        }
+
+        header h1 {
+            font-size: 48px;
+            color: #f8a300;
+            text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.8);
+            margin: 0;
+        }
+
+        .subtitle {
+            font-size: 24px;
+            color: #e0e0e0;
+            margin-top: 10px;
+        }
+
+        nav {
+            text-align: center;
+            margin: 20px 0;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            margin: 10px;
+            padding: 15px 30px;
+            background-color: rgba(255, 165, 0, 0.6);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(255, 165, 0, 0.7), 0 0 30px rgba(255, 165, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: inline-block;
+        }
+
+        nav a:hover {
+            transform: scale(1.15) rotate(3deg);
+            box-shadow: 0 0 20px rgba(255, 165, 0, 0.9), 0 0 40px rgba(255, 165, 0, 0.7);
+        }
+
+        /* 内容区域 */
+        .content-section {
+            margin: 20px auto;
+            max-width: 90%;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        /* 深空天体卡片容器 */
+        .deepspace-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px auto;
+        }
+
+        /* 深空天体卡片 */
+        .deepspace-card {
+            width: 350px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .deepspace-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0 20px rgba(255, 165, 0, 0.7);
+        }
+
+        .deepspace-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-bottom: 2px solid rgba(255, 165, 0, 0.3);
+        }
+
+        .deepspace-info {
+            padding: 20px;
+        }
+
+        .deepspace-name {
+            color: #f8a300;
+            font-size: 24px;
+            margin: 0 0 10px 0;
+        }
+
+        .deepspace-description {
+            color: #e0e0e0;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .deepspace-facts {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .deepspace-facts p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #cccccc;
+        }
+
+        /* 银河系模型 */
+        .galaxy-model {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .galaxy-disc {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(255, 255, 255, 0.9) 0%,
+                rgba(255, 165, 0, 0.7) 20%,
+                rgba(255, 69, 0, 0.5) 40%,
+                rgba(128, 0, 128, 0.3) 60%,
+                rgba(0, 0, 128, 0.1) 80%,
+                transparent 100%
+            );
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            transform: rotateX(70deg);
+            animation: rotateGalaxy 30s infinite linear;
+        }
+
+        .galaxy-core {
+            width: 60px;
+            height: 60px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: radial-gradient(
+                circle at center,
+                rgba(255, 255, 255, 1) 0%,
+                rgba(255, 165, 0, 0.8) 40%,
+                rgba(255, 69, 0, 0.6) 70%,
+                transparent 100%
+            );
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.8), 0 0 80px rgba(255, 165, 0, 0.5);
+            animation: pulsateCore 3s infinite alternate;
+        }
+
+        @keyframes rotateGalaxy {
+            0% { transform: rotateX(70deg) rotateZ(0deg); }
+            100% { transform: rotateX(70deg) rotateZ(360deg); }
+        }
+
+        @keyframes pulsateCore {
+            0% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 165, 0, 0.3); }
+            100% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.8), 0 0 80px rgba(255, 165, 0, 0.6); }
+        }
+
+        footer {
+            margin-top: auto;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            z-index: 10;
+        }
+
+        /* 返回按钮 */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            padding: 10px 20px;
+            background-color: rgba(255, 165, 0, 0.8);
+            color: white;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: rgba(255, 165, 0, 1);
+            transform: scale(1.05);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 32px;
+            }
+            
+            .subtitle {
+                font-size: 18px;
+            }
+            
+            nav a {
+                padding: 12px 20px;
+                font-size: 16px;
+                margin: 5px;
+            }
+            
+            .deepspace-card {
+                width: 280px;
+            }
+
+            .deepspace-image {
+                height: 180px;
+            }
+            
+            .deepspace-name {
+                font-size: 20px;
+            }
+
+            .galaxy-model {
+                width: 250px;
+                height: 250px;
+            }
+
+            .galaxy-core {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 24px;
+            }
+            
+            .subtitle {
+                font-size: 16px;
+            }
+            
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav a {
+                padding: 10px 15px;
+                font-size: 14px;
+                margin: 5px;
+                width: 80%;
+            }
+            
+            .deepspace-card {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .deepspace-image {
+                height: 160px;
+            }
+            
+            .back-button {
+                top: 10px;
+                left: 10px;
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+
+            .galaxy-model {
+                width: 200px;
+                height: 200px;
+            }
+
+            .galaxy-core {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景视频 -->
+    <video class="background-video" autoplay muted loop playsinline>
+        <source src="https://example.com/deep-space-video.mp4" type="video/mp4">
+        您的浏览器不支持HTML5视频。
+    </video>
+
+    <!-- 返回主页按钮 -->
+    <a href="index.html" class="back-button">返回主页</a>
+
+    <header>
+        <h1>YPM电子天文馆</h1>
+        <p class="subtitle">深空天体探索</p>
+    </header>
+
+    <!-- 银河系模型 -->
+    <div class="galaxy-model">
+        <div class="galaxy-disc"></div>
+        <div class="galaxy-core"></div>
+    </div>
+
+    <nav>
+        <a href="#nebulae">星云</a>
+        <a href="#galaxies">星系</a>
+        <a href="#clusters">星团</a>
+    </nav>
+
+    <div class="content-section" id="nebulae">
+        <h2>星云</h2>
+        <div class="deepspace-container">
+            <!-- 猎户座星云 -->
+            <div class="deepspace-card">
+                <img src="https://example.com/orion-nebula.jpg" alt="猎户座星云" class="deepspace-image">
+                <div class="deepspace-info">
+                    <h3 class="deepspace-name">猎户座星云 (M42)</h3>
+                    <p class="deepspace-description">猎户座星云是距离地球最近的大型恒星形成区域之一，呈现出壮观的红色和蓝色气体云。它是猎户座中剑柄部分明亮的天体，肉眼可见。</p>
+                    <div class="deepspace-facts">
+                        <p><strong>距离：</strong>约1,344光年</p>
+                        <p><strong>直径：</strong>约24光年</p>
+                        <p><strong>类型：</strong>发射星云</p>
+                        <p><strong>可见度：</strong>肉眼可见</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 鹰状星云 -->
+            <div class="deepspace-card">
+                <img src="https://example.com/eagle-nebula.jpg" alt="鹰状星云" class="deepspace-image">
+                <div class="deepspace-info">
+                    <h3 class="deepspace-name">鹰状星云 (M16)</h3>
+                    <p class="deepspace-description">鹰状星云以其"创生之柱"结构而闻名，这是由哈勃太空望远镜拍摄的。这些柱状结构是新恒星形成的区域，由气体和尘埃组成。</p>
+                    <div class="deepspace-facts">
+                        <p><strong>距离：</strong>约7,000光年</p>
+                        <p><strong>直径：</strong>约70光年</p>
+                        <p><strong>类型：</strong>弥漫星云</p>
+                        <p><strong>年龄：</strong>约550万年</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 螃蟹状星云 -->
+            <div class="deepspace-card">
+                <img src="https://example.com/crab-nebula.jpg" alt="螃蟹状星云" class="deepspace-image">
+                <div class="deepspace-info">
+                    <h3 class="deepspace-name">螃蟹状星云 (M1)</h3>
+                    <p class="deepspace-description">螃蟹状星云是一个超新星遗迹，由1054年中国天文学家记录的超新星爆发形成。它包含一个快速旋转的中子星（脉冲星），每秒旋转约30次。</p>
+                    <div class="deepspace-facts">
+                        <p><strong>距离：</strong>约6,500光年</p>
+                        <p><strong>直径：</strong>约11光年</p>
+                        <p><strong>类型：</strong>超新星残骸</p>
+                        <p><strong>年龄：</strong>约970年</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 猫眼星云 -->
+            <div class="deepspace-card">
+                <img src="https://example.com/cat-eye-nebula.jpg" alt="猫眼星云" class="deepspace-image">
+                <div class="deepspace-info">
+                    <h3 class="deepspace-name">猫眼星云 (NGC 6543)</h3>
+                    <p class="deepspace-description">猫眼星云是一个行星状星云，由恒星演化的最后阶段形成。它的复杂结构包括气泡、环和喷流，形成了令人惊叹的多彩图案。</p>
+                    <div class="deepspace-facts">
+                        <p><strong>距离：</strong>约3,300光年</p>
+                        <p><strong>直径：</strong>约半光年</p>
+                        <p><strong>类型：</strong>行星状星云</p>
+                        <p><strong>年龄：</strong>约1,000年</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section" id="galaxies">
+        <h2>星系</h2>
+        <div class="deepspace-container">
+            <!-- 仙女座星系 -->
+            <div class="deepspace-card">
+                <img src="https://example.com/andromeda-galaxy.jpg" alt="仙女座星系" class="deepspace-image">
+                <div class="deepspace-info">
+                    <h3 class="deepspace-name">仙女座星系 (M31)</h3>
+                    <p class="deepspace-description">仙女座星系是距离银河系最近的大型螺旋星系，也是夜空中最远的可见裸眼星体。它与银河系将在约40亿年后发生碰撞合并。</p>
+                    <div class="deepspace-facts">
+                        <p><strong>距离：</strong>约250万光年</p>
+                        <p><strong>直径：</strong>约220,000光年</p>
+                        <p><strong>类型：</strong>棒旋星系</p>
+                        <p><strong>包含恒星数：</strong>约1万亿颗</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 三角座星系 -->
+            <div class="deepspace-card">
+                <img src="https://example.com/triangulum-galaxy.jpg" alt="三角座星系" class="deepspace-image">
+                <div class="deepspace-info">
+                    <h3 class="deepspace-name">三角座星系 (M33)</h3>
+                    <p class="deepspace-description">三角座星系是本星系群中第三大星系，仅次于银河系和仙女座星系。它是一个螺旋星系，拥有大量的恒星形成区域和明亮的HII区。</p>
+                    <div class="deepspace-facts">
+                        <p><strong>距离：</strong>约300万光年</p>
+                        <p><strong>直径：</strong>约60,000光年</p>
+                        <p><strong>类型：</strong>SA(s)cd型螺旋星系</p>
+                        <p><strong>质量：</strong>约500亿太阳质量</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 漩涡星系 -->
+            <div class="deepspace-card">
+                <img src="https://example.com/whirlpool-galaxy.jpg" alt="漩涡星系" class="deepspace-image">
+                <div class="deepspace-info">
+                    <h3 class="deepspace-name">漩涡星系 (M51)</h3>
+                    <p class="deepspace-description">漩涡星系是一个经典的大型螺旋星系，拥有清晰可见的旋臂结构。它正在与较小的伴星系NGC 5195相互作用，这种相互作用扭曲了其旋臂结构。</p>
+                    <div class="deepspace-facts">
+                        <p><strong>距离：</strong>约2300万光年</p>
+                        <p><strong>直径：</strong>约60,000光年</p>
+                        <p><strong>类型：</strong>SAB(rs)bc型螺旋星系</p>
+                        <p><strong>发现年份：</strong>1773年</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 车轮星系 -->
+            <div class="deepspace-card">
+                <img src="https://example.com/cartwheel-galaxy.jpg" alt="车轮星系" class="deepspace-image">
+                <div class="deepspace-info">
+                    <h3 class="deepspace-name">车轮星系</h3>
+                    <p class="deepspace-description">车轮星系是一个环状星系，形成于约2亿年前的星系碰撞事件。这次碰撞产生了从中心向外扩散的冲击波，形成了类似车轮的外环结构。</p>
+                    <div class="deepspace-facts">
+                        <p><strong>距离：</strong>约5亿光年</p>
+                        <p><strong>直径：</strong>约150,000光年</p>
+                        <p><strong>类型：</strong>环状星系</p>
+                        <p><strong>所在星座：</strong>雕刻家座</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section" id="clusters">
+        <h2>星团</h2>
+        <div class="deepspace-container">
+            <!-- 昴宿星团 -->
+            <div class="deepspace-card">
+                <img src="https://example.com/pleiades.jpg" alt="昴宿星团" class="deepspace-image">
+                <div class="deepspace-info">
+                    <h3 class="deepspace-name">昴宿星团 (M45)</h3>
+                    <p class="deepspace-description">昴宿星团是肉眼可见的最著名开放星团之一，也被称为"七姊妹"。它包含数百颗年轻恒星，被蓝色反射星云所环绕。</p>
+                    <div class="deepspace-facts">
+                        <p><strong>距离：</strong>约444光年</p>
+                        <p><strong>年龄：</strong>约1亿年</p>
+                        <p><strong>类型：</strong>开放星团</p>
+                        <p><strong>亮度：</strong>1.6等</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 球状星团M13 -->
+            <div class="deepspace-card">
+                <img src="https://example.com/m13-globular-cluster.jpg" alt="球状星团M13" class="deepspace-image">
+                <div class="deepspace-info">
+                    <h3 class="deepspace-name">大型球状星团 (M13)</h3>
+                    <p class="deepspace-description">M13是北半球最著名的球状星团，位于武仙座。它包含数十万颗密集排列的恒星，形成球形结构，是银河系最古老的天体之一。</p>
+                    <div class="deepspace-facts">
+                        <p><strong>距离：</strong>约22,000光年</p>
+                        <p><strong>年龄：</strong>约120亿年</p>
+                        <p><strong>类型：</strong>球状星团</p>
+                        <p><strong>直径：</strong>约145光年</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 双星团 -->
+            <div class="deepspace-card">
+                <img src="https://example.com/double-cluster.jpg" alt="双星团" class="deepspace-image">
+                <div class="deepspace-info">
+                    <h3 class="deepspace-name">英仙座双星团 (NGC 869 & NGC 884)</h3>
+                    <p class="deepspace-description">英仙座双星团由两个相邻的开放星团组成，肉眼可见为天空中的一个模糊斑点。它们是夜空中最壮观的双星团，包含数千颗年轻恒星。</p>
+                    <div class="deepspace-facts">
+                        <p><strong>距离：</strong>约7,500光年</p>
+                        <p><strong>年龄：</strong>约1300万年</p>
+                        <p><strong>类型：</strong>开放星团</p>
+                        <p><strong>肉眼可见度：</strong>黑暗天空下可见</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 蜂巢星团 -->
+            <div class="deepspace-card">
+                <img src="https://example.com/beehive-cluster.jpg" alt="蜂巢星团" class="deepspace-image">
+                <div class="deepspace-info">
+                    <h3 class="deepspace-name">蜂巢星团 (M44)</h3>
+                    <p class="deepspace-description">蜂巢星团是巨蟹座中一个开放星团，又称为"马槽"，是距离地球最近的星团之一。在黑暗无月的夜晚，肉眼可见为一个模糊的发光斑点。</p>
+                    <div class="deepspace-facts">
+                        <p><strong>距离：</strong>约577光年</p>
+                        <p><strong>年龄：</strong>约6亿年</p>
+                        <p><strong>类型：</strong>开放星团</p>
+                        <p><strong>已知恒星数：</strong>约1,000颗</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YPM电子天文馆 | 所有权利保留</p>
+    </footer>
+</body>
+</html> 
